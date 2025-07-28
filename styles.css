@@ -276,6 +276,7 @@ body {
     box-shadow: var(--shadow-2);
     min-width: 120px;
     justify-content: center;
+    will-change: transform, box-shadow;
 }
 
 .btn-primary {
@@ -459,7 +460,8 @@ body {
     background: var(--bg-primary);
     color: var(--text-primary);
     outline: none;
-    transition: var(--transition-fast);
+    transition: opacity var(--transition-normal), background-color var(--transition-fast);
+    will-change: opacity;
 }
 
 .editor-textarea:focus {
@@ -492,6 +494,12 @@ body {
     align-items: center;
     z-index: 1000;
     backdrop-filter: blur(20px);
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.loading-overlay.show {
+    opacity: 1;
 }
 
 .loading-spinner {

@@ -10,6 +10,22 @@ class SRTProcessor {
         this.processedContent = '';
         this.originalFileName = '';
         this.isProcessing = false;
+        this.updateStatsDebounced = this.debounce(this.updateStats.bind(this), 100);
+    }
+
+    /**
+     * 防抖函数
+     */
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
     }
 
     /**
@@ -128,21 +144,35 @@ class SRTProcessor {
         }
 
         this.originalFileName = file.name;
-        this.showLoading(true);
+
+        // 使用requestAnimationFrame来避免闪烁
+        requestAnimationFrame(() => {
+            this.showLoading(true);
+        });
 
         const reader = new FileReader();
         reader.onload = (e) => {
-            this.originalText.value = e.target.result;
-            this.handleTextChange();
-            this.showLoading(false);
-            this.showNotification('文件加载成功', 'success');
+            // 批量更新DOM以减少重排
+            requestAnimationFrame(() => {
+                // 暂时隐藏文本区域以避免闪烁
+                this.originalText.style.opacity = '0';
+                this.originalText.value = e.target.result;
+
+                // 使用setTimeout确保DOM更新完成
+                setTimeout(() => {
+                    this.handleTextChange();
+                    this.originalText.style.opacity = '1';
+                    this.showLoading(false);
+                    this.showNotification('文件加载成功', 'success');
+                }, 50);
+            });
         };
-        
+
         reader.onerror = () => {
             this.showLoading(false);
             this.showNotification('文件读取失败', 'error');
         };
-        
+
         reader.readAsText(file, 'UTF-8');
     }
 
@@ -152,16 +182,19 @@ class SRTProcessor {
     handleTextChange() {
         const content = this.originalText.value.trim();
         const hasContent = content.length > 0;
-        
-        this.processButton.disabled = !hasContent;
-        
-        if (!hasContent) {
-            this.processedText.value = '';
-            this.downloadButton.disabled = true;
-            this.processedContent = '';
-        }
-        
-        this.updateStats();
+
+        // 批量更新DOM以减少重排
+        requestAnimationFrame(() => {
+            this.processButton.disabled = !hasContent;
+
+            if (!hasContent) {
+                this.processedText.value = '';
+                this.downloadButton.disabled = true;
+                this.processedContent = '';
+            }
+
+            this.updateStatsDebounced();
+        });
     }
 
     /**
@@ -364,7 +397,21 @@ class SRTProcessor {
      * 显示/隐藏加载动画
      */
     showLoading(show) {
-        this.loadingOverlay.style.display = show ? 'flex' : 'none';
+        if (show) {
+            this.loadingOverlay.style.display = 'flex';
+            // 使用requestAnimationFrame确保display设置后再添加show类
+            requestAnimationFrame(() => {
+                this.loadingOverlay.classList.add('show');
+            });
+        } else {
+            this.loadingOverlay.classList.remove('show');
+            // 等待过渡动画完成后隐藏元素
+            setTimeout(() => {
+                if (!this.loadingOverlay.classList.contains('show')) {
+                    this.loadingOverlay.style.display = 'none';
+                }
+            }, 200); // 与CSS过渡时间匹配
+        }
     }
 
     /**
