@@ -70,29 +70,29 @@
     </div>
 
     <div class="container">
-        <div class="header">
-            <div class="header-icon">
+        <header class="header">
+            <div class="header-icon" aria-hidden="true">
                 <i class="fas fa-video"></i>
             </div>
             <h1>SRT字幕时间调整器</h1>
             <p>消除相邻字幕之间的时间空隙，让字幕连续播放</p>
             <div class="header-stats">
                 <div class="stat-item">
-                    <i class="fas fa-clock"></i>
+                    <i class="fas fa-clock" aria-hidden="true"></i>
                     <span>精确时间调整</span>
                 </div>
                 <div class="stat-item">
-                    <i class="fas fa-magic"></i>
+                    <i class="fas fa-magic" aria-hidden="true"></i>
                     <span>一键处理</span>
                 </div>
                 <div class="stat-item">
-                    <i class="fas fa-download"></i>
+                    <i class="fas fa-download" aria-hidden="true"></i>
                     <span>即时下载</span>
                 </div>
             </div>
-        </div>
+        </header>
 
-        <div class="main-content">
+        <main class="main-content">
             <div class="upload-section">
                 <div class="upload-area" id="uploadArea">
                     <div class="upload-icon">
@@ -184,7 +184,7 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
     <!-- 加载提示 -->
@@ -204,5 +204,20 @@
     </div>
 
     <script src="script.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
